@@ -32,7 +32,7 @@ var EntryController = function (_Entry) {
 
 		var _this = _possibleConstructorReturn(this, (EntryController.__proto__ || Object.getPrototypeOf(EntryController)).call(this));
 
-		_this.dataStructure = '';
+		_this.entry = '';
 		return _this;
 	}
 
@@ -44,13 +44,13 @@ var EntryController = function (_Entry) {
 					res.status(409).json({
 						message: error,
 						status: 'Failed',
-						data: []
+						entries: []
 					});
 				} else {
 					res.status(200).json({
 						message: 'Retrieved',
 						status: 'Success',
-						data: response.rows
+						entries: response.rows
 					});
 				}
 			});
@@ -63,13 +63,13 @@ var EntryController = function (_Entry) {
 					res.status(code).json({
 						message: error,
 						status: 'Failed',
-						data: []
+						entry: []
 					});
 				} else {
 					res.status(200).json({
 						message: 'Retrieved',
 						status: 'Success',
-						data: response.rows[0]
+						entry: response.rows[0]
 					});
 				}
 			});
@@ -81,30 +81,43 @@ var EntryController = function (_Entry) {
 				res.status(422).json({
 					message: 'Please fill all the input fields!',
 					status: 'Failed',
-					data: []
+					entry: []
 				});
 			} else if (req.body.title && req.body.description) {
-				this.createEntry(req, function (error) {
-					console.log(error);
-					if (error) {
-						res.status(409).json({
-							message: error,
-							status: 'Failed',
-							data: { error: error }
-						});
-					} else {
-						res.status(201).json({
-							message: 'Entry has been created!',
-							status: 'Success',
-							data: []
-						});
-					}
-				});
+				if (req.body.title.length < 10) {
+					res.status(409).json({
+						message: 'Your title is too short, minimum 10 letters!',
+						status: 'Failed',
+						entry: []
+					});
+				} else if (req.body.description.length < 20) {
+					res.status(409).json({
+						message: 'Your description is too short, minimum 20 letters!',
+						status: 'Failed',
+						entry: []
+					});
+				} else {
+					this.createEntry(req, function (error) {
+						if (error) {
+							res.status(409).json({
+								message: error,
+								status: 'Failed',
+								entry: { error: error }
+							});
+						} else {
+							res.status(201).json({
+								message: 'Entry has been created!',
+								status: 'Success',
+								entry: []
+							});
+						}
+					});
+				}
 			} else {
 				res.status(400).json({
 					message: 'Bad request!',
 					status: 'Failed',
-					data: []
+					entry: []
 				});
 			}
 		}
@@ -115,29 +128,43 @@ var EntryController = function (_Entry) {
 				res.status(422).json({
 					message: 'Please fill all the input fields!',
 					status: 'Failed',
-					data: []
+					entry: []
 				});
 			} else if (req.body.title && req.body.description) {
-				this.updateEntry(req, function (error, code) {
-					if (error) {
-						res.status(code).json({
-							message: error,
-							status: 'Failed',
-							data: []
-						});
-					} else {
-						res.status(200).json({
-							message: 'This entry has been updated!',
-							status: 'Success',
-							data: []
-						});
-					}
-				});
+				if (req.body.title.length < 10) {
+					res.status(409).json({
+						message: 'Your title is too short, minimum 10 letters!',
+						status: 'Failed',
+						entry: []
+					});
+				} else if (req.body.description.length < 20) {
+					res.status(409).json({
+						message: 'Your description is too short, minimum 20 letters!',
+						status: 'Failed',
+						entry: []
+					});
+				} else {
+					this.updateEntry(req, function (error, code) {
+						if (error) {
+							res.status(code).json({
+								message: error,
+								status: 'Failed',
+								entry: []
+							});
+						} else {
+							res.status(200).json({
+								message: 'This entry has been updated!',
+								status: 'Success',
+								entry: []
+							});
+						}
+					});
+				}
 			} else {
 				res.status(400).json({
 					message: 'Bad request!',
 					status: 'Failed',
-					data: []
+					entry: []
 				});
 			}
 		}
@@ -149,13 +176,13 @@ var EntryController = function (_Entry) {
 					res.status(400).json({
 						message: error,
 						status: 'Failed',
-						data: []
+						entry: []
 					});
 				} else {
 					res.status(204).json({
 						message: 'Entry Deleted!',
 						status: 'Success',
-						data: []
+						entry: []
 					});
 				}
 			});

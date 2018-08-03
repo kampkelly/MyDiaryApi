@@ -22,14 +22,14 @@ var request = new _requests2.default();
 describe('Test Global Routes', function () {
 	describe('visitInvalidRoute()', function () {
 		it('should show not found when a user visits a mispelt address', function (done) {
-			var url = process.env.root_url + '/' + process.env.version_url + '/no_entries';
+			var url = '' + process.env.root_url + process.env.version_url + '/no_entries';
 			var headers = {
 				'Content-Type': 'application/json'
 			};
 			request.getOrDelete('GET', url, headers, function (error, res, body) {
 				var jsonObject = JSON.parse(body);
 				expect(res.statusCode).to.be.equal(404);
-				expect(jsonObject.error).to.be.equal('Not Found! The page you are trying to access does not exist!');
+				expect(jsonObject.message).to.be.equal('Not Found! The page you are trying to access does not exist!');
 				done();
 			});
 		}).timeout(20000);

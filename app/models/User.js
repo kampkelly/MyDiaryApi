@@ -134,16 +134,26 @@ var User = function () {
 	}, {
 		key: 'updateUser',
 		value: function updateUser(req, callback) {
+			var _this3 = this;
+
 			var userId = req.userData.id;
 			var _req$body3 = req.body,
 			    email = _req$body3.email,
 			    fullName = _req$body3.fullName,
 			    dateOfBirth = _req$body3.dateOfBirth;
 
-			var sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
-			var values = [email, fullName, dateOfBirth, userId];
-			this.pool.query(sql, values, function (err, res) {
-				callback(err, res);
+			_joi2.default.validate({
+				email: email
+			}, this.schema, function (error) {
+				if (error) {
+					callback('The email must be a valid email!');
+				} else {
+					var sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
+					var values = [email, fullName, dateOfBirth, userId];
+					_this3.pool.query(sql, values, function (err, res) {
+						callback(err, res);
+					});
+				}
 			});
 		}
 	}, {

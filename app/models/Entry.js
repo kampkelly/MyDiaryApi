@@ -51,8 +51,15 @@ var Entry = function () {
 		key: 'allEntries',
 		value: function allEntries(req, callback) {
 			var userId = req.userData.id;
-			var sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
-			var values = [userId];
+			var sql = void 0;
+			var values = void 0;
+			if (req.query.limit) {
+				sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC LIMIT $2';
+				values = [userId, req.query.limit];
+			} else {
+				sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
+				values = [userId];
+			}
 			this.pool.query(sql, values, function (error, res) {
 				if (error) {
 					callback(error.detail, res);
@@ -77,8 +84,6 @@ var Entry = function () {
 				if (err) {
 					callback(err.details[0].message);
 				} else {
-					console.log(err);
-					console.log('am creating');
 					var sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3)';
 					var values = [title, description, userId];
 					_this.pool.query(sql, values, function (error) {
@@ -140,7 +145,7 @@ var Entry = function () {
 						} else if (!error) {
 							if (response.rows[0].user_id === userId) {
 								var time = Date.now();
-								var timeCreated = (0, _moment2.default)(response.rows[0].created_at).format('X');
+								var timeCreated = (0, _moment2.default)(response.rows[0].createdAt).format('X');
 								var timeNow = (0, _moment2.default)().format('X');
 								var diff = (timeNow - timeCreated) / 86400;
 								if (diff <= 1) {
@@ -149,7 +154,7 @@ var Entry = function () {
 									_this2.pool.query(updateSql, updateValues, function (updateError) {
 										callback(updateError, 200);
 									});
-								} else if (time !== response.rows[0].created_at) {
+								} else if (time !== response.rows[0].createdAt) {
 									callback('This entry is old and can no longer be updated!', 403);
 								}
 							} else if (response.rows[0].user_id !== userId) {

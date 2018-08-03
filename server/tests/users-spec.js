@@ -1,6 +1,5 @@
 import chai from 'chai';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
 import Request from '../helpers/requests';
 import { mainServer } from '../app';
 
@@ -8,17 +7,13 @@ dotenv.config();
 const { expect } = chai;
 const request = new Request();
 const user = {
-	email: 'coolerkamp@gmail.com',
+	email: 'kamp@gmail.com',
 	password: 'password',
 	confirmPassword: 'password',
-	fullName: 'User Name',
+	fullName: 'Kamp Name',
 	dateOfBirth: '2018-04-02',
 };
-const payload = {
-	email: 'kamp@gmail.com',
-	id: 1,
-};
-const token = jwt.sign(payload, process.env.secret_token, { expiresIn: 6000 });
+const token = null;
 const headers = {
 	token,
 };
@@ -27,12 +22,10 @@ describe('User Tests', () => {
 	after(() => {
 		mainServer.close();
 	});
-	describe('signupUser()', () => {
+	describe('auth()', () => {
 		it('should signup a user with correct form details', (done) => {
-			process.env.NODE_ENV = 'test';
 			const url = `${process.env.root_url}${process.env.version_url}/auth/signup`;
 			request.postOrPut('POST', url, user, headers, (error, res, body) => {
-				console.log(error);
 				const jsonObject = JSON.parse(body);
 				expect(res.statusCode).to.be.equal(201);
 				expect(jsonObject.message).to.be.equal('You have successfully signed up and signed in!');
@@ -48,7 +41,7 @@ describe('User Tests', () => {
 				password: 'password',
 				confirmPassword: 'password',
 				fullName: 'User Name',
-				dateOfBirth: '2018-04',
+				dateOfBirth: '2018-04-02',
 			};
 			request.postOrPut('POST', url, tempUser, headers, (error, res, body) => {
 				const jsonObject = JSON.parse(body);
@@ -66,7 +59,7 @@ describe('User Tests', () => {
 				password: 'password',
 				confirmPassword: 'password',
 				username: 'User Name',
-				dateOfBirth: '2018-04',
+				dateOfBirth: '2018-04-02',
 			};
 			request.postOrPut('POST', url, tempUser, headers, (error, res, body) => {
 				const jsonObject = JSON.parse(body);
@@ -76,10 +69,57 @@ describe('User Tests', () => {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should show error on trying to signup with same email', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/signup`;
+			request.postOrPut('POST', url, user, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('A user with this email already exists!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show password too short', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/signup`;
+			const tempUser = {
+				email: 'user1@example.com',
+				password: 'pass',
+				confirmPassword: 'pass',
+				fullName: 'User Name',
+				dateOfBirth: '2018-04-02',
+			};
+			request.postOrPut('POST', url, tempUser, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(422);
+				expect(jsonObject.message).to.be.equal('Password length must be at least 6 characters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show password not matching with confirm password', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/signup`;
+			const tempUser = {
+				email: 'user1@example.com',
+				password: 'password',
+				confirmPassword: 'password31',
+				fullName: 'User Name',
+				dateOfBirth: '2018-04-02',
+			};
+			request.postOrPut('POST', url, tempUser, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(401);
+				expect(jsonObject.message).to.be.equal('Passwords do not match!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('signinUser()', () => {
-		it('should signin a user whose email is present', (done) => {
+		it('should signin user whose account exists', (done) => {
 			const url = `${process.env.root_url}${process.env.version_url}/auth/login`;
 			const formData = {
 				email: 'kamp@gmail.com',
@@ -87,6 +127,7 @@ describe('User Tests', () => {
 			};
 			request.postOrPut('POST', url, formData, headers, (error, res, body) => {
 				const jsonObject = JSON.parse(body);
+				headers.token = jsonObject.user.token;
 				expect(res.statusCode).to.be.equal(200);
 				expect(jsonObject.message).to.be.equal('You have signed in successfully!');
 				expect(jsonObject.status).to.be.equal('Success');
@@ -215,6 +256,20 @@ describe('User Tests', () => {
 	});
 
 	describe('saveNotifications()', () => {
+		it('should update user notification', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/user/notifications`;
+			const formData = {
+				reminderTime: '10:00:00',
+			};
+			request.postOrPut('PUT', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(422);
+				expect(jsonObject.message).to.be.equal('Your notification setting has been updated!');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
+
 		it('should return error when form field is empty', (done) => {
 			const url = `${process.env.root_url}${process.env.version_url}/user/notifications`;
 			const formData = {

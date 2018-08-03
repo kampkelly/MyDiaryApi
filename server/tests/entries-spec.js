@@ -7,7 +7,7 @@ dotenv.config();
 const { expect } = chai;
 const request = new Request();
 const payload = {
-	email: 'kamp@gmail.com',
+	email: 'coolentry@gmail.com',
 	id: 1,
 };
 const token = jwt.sign(payload, process.env.secret_token, { expiresIn: 6000 });
@@ -17,6 +17,21 @@ const headers = {
 
 describe('Test Entries Routes', () => {
 	describe('createEntry()', () => {
+		it('should create an entry', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries`;
+			const formData = {
+				title: ' New title is here',
+				description: 'New Description can be found at this location',
+			};
+			request.postOrPut('POST', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(201);
+				expect(jsonObject.message).to.be.equal('Entry has been created!');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
+
 		it('validation should fail when any form field is empty', (done) => {
 			const url = `${process.env.root_url}${process.env.version_url}/entries`;
 			const formData = {
@@ -46,11 +61,80 @@ describe('Test Entries Routes', () => {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should give title too short when less than 10 letters', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries`;
+			const formData = {
+				title: 'New',
+				description: 'New Description for this blog post',
+			};
+			request.postOrPut('POST', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('Your title is too short, minimum 10 letters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should give description too short when less than 20 letters', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries`;
+			const formData = {
+				title: 'The New Title Here',
+				description: 'New one',
+			};
+			request.postOrPut('POST', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('Your description is too short, minimum 20 letters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+	});
+
+	describe('showAllEntries()', () => {
+		it('should show all entries', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries`;
+			request.getOrDelete('GET', url, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Retrieved');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show all entries with limit in query params', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries?limit=4`;
+			request.getOrDelete('GET', url, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Retrieved');
+				expect(jsonObject.status).to.be.equal('Success');
+				expect(jsonObject.entries).to.have.lengthOf.at.most(4);
+				done();
+			});
+		}).timeout(30000);
+	});
+
+	describe('showOneEntries()', () => {
+		it('should show one entry', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
+			request.getOrDelete('GET', url, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Retrieved');
+				expect(jsonObject.status).to.be.equal('Success');
+				expect(jsonObject.entry).to.be.a('Object');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('updateEntry()', () => {
 		it('validation should fail when any form field is empty', (done) => {
-			const url = `${process.env.root_url}${process.env.version_url}/entries/4`;
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
 			const formData = {
 				title: ' ',
 				description: 'Cool',
@@ -65,7 +149,7 @@ describe('Test Entries Routes', () => {
 		}).timeout(30000);
 
 		it('should give error when incorrect form data is sent', (done) => {
-			const url = `${process.env.root_url}${process.env.version_url}/entries/4`;
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
 			const formData = {
 				name: 'First Title',
 				body: 'Cool',
@@ -78,9 +162,48 @@ describe('Test Entries Routes', () => {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should give title too short when less than 10 letters', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
+			const formData = {
+				title: 'New',
+				description: 'New Description for this blog post',
+			};
+			request.postOrPut('PUT', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('Your title is too short, minimum 10 letters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should give description too short when less than 20 letters', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
+			const formData = {
+				title: 'The New Title Here',
+				description: 'New one',
+			};
+			request.postOrPut('PUT', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('Your description is too short, minimum 20 letters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('deleteEntry()', () => {
+		it('should delete an entry', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
+			request.getOrDelete('DELETE', url, headers, (error, res, body) => {
+				console.log(body);
+				expect(res.statusCode).to.be.equal(204);
+				done();
+			});
+		}).timeout(30000);
+
 		it('should show error when id doesnt exist', (done) => {
 			const url = `${process.env.root_url}${process.env.version_url}/entries/700`;
 			request.getOrDelete('DELETE', url, headers, (error, res, body) => {

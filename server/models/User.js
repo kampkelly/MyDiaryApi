@@ -101,10 +101,18 @@ class User {
 		const {
 			email, fullName, dateOfBirth,
 		} = req.body;
-		const sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
-		const values = [email, fullName, dateOfBirth, userId];
-		this.pool.query(sql, values, (err, res) => {
-			callback(err, res);
+		Joi.validate({
+			email,
+		}, this.schema, (error) => {
+			if (error) {
+				callback('The email must be a valid email!');
+			} else {
+				const sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
+				const values = [email, fullName, dateOfBirth, userId];
+				this.pool.query(sql, values, (err, res) => {
+					callback(err, res);
+				});
+			}
 		});
 	}
 

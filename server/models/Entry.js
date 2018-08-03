@@ -24,8 +24,15 @@ class Entry {
 
 	allEntries(req, callback) {
 		const userId = req.userData.id;
-		const sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
-		const values = [userId];
+		let sql;
+		let values;
+		if (req.query.limit) {
+			sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC LIMIT $2';
+			values = [userId, req.query.limit];
+		} else {
+			sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
+			values = [userId];
+		}
 		this.pool.query(sql, values, (error, res) => {
 			if (error) {
 				callback(error.detail, res);
@@ -46,8 +53,6 @@ class Entry {
 			if (err) {
 				callback(err.details[0].message);
 			} else {
-				console.log(err);
-				console.log('am creating');
 				const sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3)';
 				const values = [title, description, userId];
 				this.pool.query(sql, values, (error) => {
@@ -104,7 +109,7 @@ class Entry {
 					} else if (!error) {
 						if (response.rows[0].user_id === userId) {
 							const time = Date.now();
-							const timeCreated = moment(response.rows[0].created_at).format('X');
+							const timeCreated = moment(response.rows[0].createdAt).format('X');
 							const timeNow = moment().format('X');
 							const diff = (timeNow - timeCreated) / 86400;
 							if (diff <= 1) {
@@ -113,7 +118,7 @@ class Entry {
 								this.pool.query(updateSql, updateValues, (updateError) => {
 									callback(updateError, 200);
 								});
-							} else if (time !== response.rows[0].created_at) {
+							} else if (time !== response.rows[0].createdAt) {
 								callback('This entry is old and can no longer be updated!', 403);
 							}
 						} else if (response.rows[0].user_id !== userId) {
