@@ -4,10 +4,11 @@
 		"description": "This application is used to power the front-end of mydiary application",
 		"main": "app/dist/app.js",
 		"scripts": {
-				"test": "NODE_ENV=test grunt mochaTest",
-				"coverage": "NODE_ENV=test node node_modules/.bin/istanbul cover _mocha -- -R spec app/tests",
+				"test": "NODE_ENV=test node app/helpers/migrate.js && NODE_ENV=test grunt mochaTest",
+				"coverage": "NODE_ENV=test node app/helpers/migrate.js && NODE_ENV=test node node_modules/.bin/istanbul cover _mocha -- -R spec app/tests",
 				"coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
-				"start": "NODE_ENV=production node app/app.js",
+				"compile": "grunt babel",
+				"start": "grunt babel && NODE_ENV=production node app/app.js",
 				"watch": "grunt watch",
 				"build": "NODE_ENV=production node app/app.js"
 		},

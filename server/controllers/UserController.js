@@ -7,30 +7,36 @@ dotenv.config();
 class UserController extends User {
 	constructor() {
 		super();
-		this.dataStructure = '';
+		this.user = '';
 	}
 
 	signUp(req, res) {
 		const {
 			email, password, confirmPassword, dateOfBirth, fullName,
 		} = req.body;
-		if (email === ' ' || dateOfBirth === ' ' || fullName === ' ' || password === ' ' || password.length < 6) {
+		if (email === ' ' || dateOfBirth === ' ' || fullName === ' ' || password === ' ') {
 			res.status(422).json({
 				message: 'Please fill all the input fields!',
 				status: 'Failed',
-				data: [],
+				user: [],
+			});
+		} else if (password.length < 6) {
+			res.status(422).json({
+				message: 'Password length must be at least 6 characters!',
+				status: 'Failed',
+				user: [],
 			});
 		} else if (password !== confirmPassword) {
 			res.status(401).json({
 				message: 'Passwords do not match!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else if (!email || !dateOfBirth || !fullName || !password) {
 			res.status(400).json({
 				message: 'Bad Request!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else {
 			req.body.email = req.body.email.toLowerCase().replace(/\s+/g, '');
@@ -40,7 +46,7 @@ class UserController extends User {
 					res.status(409).json({
 						message: error,
 						status: 'Failed',
-						data: [],
+						user: [],
 					});
 				} else {
 					const payload = {
@@ -51,7 +57,7 @@ class UserController extends User {
 					res.status(201).json({
 						message: 'You have successfully signed up and signed in!',
 						status: 'Success',
-						data: { token },
+						user: { token },
 					});
 				}
 			});
@@ -60,17 +66,23 @@ class UserController extends User {
 
 	signIn(req, res) {
 		const { email, password } = req.body;
-		if (email === ' ' || password === ' ' || password < 6) {
+		if (email === ' ' || password === ' ') {
 			res.status(422).json({
 				message: 'Please fill all the input fields!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else if (!email || !password) {
 			res.status(400).json({
 				message: 'Bad Request!',
 				status: 'Failed',
-				data: [],
+				user: [],
+			});
+		} else if (password.length < 6) {
+			res.status(422).json({
+				message: 'Password length must be at least 6 characters!',
+				status: 'Failed',
+				user: [],
 			});
 		} else {
 			this.loginUser(req, (err, response) => {
@@ -78,13 +90,13 @@ class UserController extends User {
 					res.status(500).json({
 						message: err,
 						status: 'Failed',
-						data: [],
+						user: [],
 					});
 				} else if (!response.rows || response.rows[0] === undefined) {
 					res.status(401).json({
 						message: 'Unauthorized! You are not allowed to log in!',
 						status: 'Failed',
-						data: [],
+						user: [],
 					});
 				} else {
 					let user = response.rows[0];
@@ -98,7 +110,7 @@ class UserController extends User {
 					res.status(200).json({
 						message: 'You have signed in successfully!',
 						status: 'Success',
-						data: { user, token },
+						user: { user, token },
 					});
 				}
 			});
@@ -111,7 +123,7 @@ class UserController extends User {
 				res.status(400).json({
 					message: err,
 					status: 'Failed',
-					data: [],
+					user: [],
 				});
 			} else {
 				let user = response.rows[0];
@@ -120,7 +132,7 @@ class UserController extends User {
 				res.status(200).json({
 					message: 'Retrieved!',
 					status: 'Success',
-					data: { user },
+					user: { user },
 				});
 			}
 		});
@@ -131,27 +143,27 @@ class UserController extends User {
 			res.status(400).json({
 				message: 'Bad Request!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else if (req.body.email === ' ' || req.body.fullName === ' ' || req.body.dateOfBirth === ' ') {
 			res.status(422).json({
 				message: 'Please fill all the input fields!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else {
 			this.updateUser(req, (err) => {
 				if (err) {
 					res.status(400).json({
-						message: 'Error! Could not update profile to database!',
+						message: err,
 						status: 'Failed',
-						data: [],
+						user: [],
 					});
 				} else {
 					res.status(200).json({
 						message: 'Your Profile has been updated!',
 						status: 'Success',
-						data: [],
+						user: [],
 					});
 				}
 			});
@@ -163,13 +175,13 @@ class UserController extends User {
 			res.status(400).json({
 				message: 'Bad Request!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else if (req.body.reminderTime === ' ') {
 			res.status(422).json({
 				message: 'Please pick a date for your notification!',
 				status: 'Failed',
-				data: [],
+				user: [],
 			});
 		} else {
 			this.setReminder(req, (err) => {
@@ -177,13 +189,13 @@ class UserController extends User {
 					res.status(400).json({
 						message: err,
 						status: 'Failed',
-						data: [],
+						user: [],
 					});
 				} else {
 					res.status(422).json({
 						message: 'Your notification setting has been updated!',
 						status: 'Success',
-						data: [],
+						user: [],
 					});
 				}
 			});

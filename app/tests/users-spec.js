@@ -8,10 +8,6 @@ var _dotenv = require('dotenv');
 
 var _dotenv2 = _interopRequireDefault(_dotenv);
 
-var _jsonwebtoken = require('jsonwebtoken');
-
-var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
-
 var _requests = require('../helpers/requests');
 
 var _requests2 = _interopRequireDefault(_requests);
@@ -25,17 +21,13 @@ var expect = _chai2.default.expect;
 
 var request = new _requests2.default();
 var user = {
-	email: 'coolerkamp@gmail.com',
+	email: 'kamp@gmail.com',
 	password: 'password',
 	confirmPassword: 'password',
-	fullName: 'User Name',
+	fullName: 'Kamp Name',
 	dateOfBirth: '2018-04-02'
 };
-var payload = {
-	email: 'kamp@gmail.com',
-	id: 1
-};
-var token = _jsonwebtoken2.default.sign(payload, process.env.secret_token, { expiresIn: 6000 });
+var token = null;
 var headers = {
 	token: token
 };
@@ -44,12 +36,10 @@ describe('User Tests', function () {
 	after(function () {
 		_app.mainServer.close();
 	});
-	describe('signupUser()', function () {
+	describe('auth()', function () {
 		it('should signup a user with correct form details', function (done) {
-			process.env.NODE_ENV = 'test';
 			var url = '' + process.env.root_url + process.env.version_url + '/auth/signup';
 			request.postOrPut('POST', url, user, headers, function (error, res, body) {
-				console.log(error);
 				var jsonObject = JSON.parse(body);
 				expect(res.statusCode).to.be.equal(201);
 				expect(jsonObject.message).to.be.equal('You have successfully signed up and signed in!');
@@ -65,7 +55,7 @@ describe('User Tests', function () {
 				password: 'password',
 				confirmPassword: 'password',
 				fullName: 'User Name',
-				dateOfBirth: '2018-04'
+				dateOfBirth: '2018-04-02'
 			};
 			request.postOrPut('POST', url, tempUser, headers, function (error, res, body) {
 				var jsonObject = JSON.parse(body);
@@ -83,7 +73,7 @@ describe('User Tests', function () {
 				password: 'password',
 				confirmPassword: 'password',
 				username: 'User Name',
-				dateOfBirth: '2018-04'
+				dateOfBirth: '2018-04-02'
 			};
 			request.postOrPut('POST', url, tempUser, headers, function (error, res, body) {
 				var jsonObject = JSON.parse(body);
@@ -93,10 +83,57 @@ describe('User Tests', function () {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should show error on trying to signup with same email', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/auth/signup';
+			request.postOrPut('POST', url, user, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(409);
+				expect(jsonObject.message).to.be.equal('A user with this email already exists!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show password too short', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/auth/signup';
+			var tempUser = {
+				email: 'user1@example.com',
+				password: 'pass',
+				confirmPassword: 'pass',
+				fullName: 'User Name',
+				dateOfBirth: '2018-04-02'
+			};
+			request.postOrPut('POST', url, tempUser, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(422);
+				expect(jsonObject.message).to.be.equal('Password length must be at least 6 characters!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show password not matching with confirm password', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/auth/signup';
+			var tempUser = {
+				email: 'user1@example.com',
+				password: 'password',
+				confirmPassword: 'password31',
+				fullName: 'User Name',
+				dateOfBirth: '2018-04-02'
+			};
+			request.postOrPut('POST', url, tempUser, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(401);
+				expect(jsonObject.message).to.be.equal('Passwords do not match!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('signinUser()', function () {
-		it('should signin a user whose email is present', function (done) {
+		it('should signin user whose account exists', function (done) {
 			var url = '' + process.env.root_url + process.env.version_url + '/auth/login';
 			var formData = {
 				email: 'kamp@gmail.com',
@@ -104,6 +141,7 @@ describe('User Tests', function () {
 			};
 			request.postOrPut('POST', url, formData, headers, function (error, res, body) {
 				var jsonObject = JSON.parse(body);
+				headers.token = jsonObject.user.token;
 				expect(res.statusCode).to.be.equal(200);
 				expect(jsonObject.message).to.be.equal('You have signed in successfully!');
 				expect(jsonObject.status).to.be.equal('Success');
@@ -232,6 +270,20 @@ describe('User Tests', function () {
 	});
 
 	describe('saveNotifications()', function () {
+		it('should update user notification', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/user/notifications';
+			var formData = {
+				reminderTime: '10:00:00'
+			};
+			request.postOrPut('PUT', url, formData, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(422);
+				expect(jsonObject.message).to.be.equal('Your notification setting has been updated!');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
+
 		it('should return error when form field is empty', function (done) {
 			var url = '' + process.env.root_url + process.env.version_url + '/user/notifications';
 			var formData = {

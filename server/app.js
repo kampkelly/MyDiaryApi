@@ -18,7 +18,11 @@ app.use(bodyParser.json());
 app.use(app.get('appVersion'), entriesRouter);
 app.use(app.get('appVersion'), usersRouter);
 app.get('*', (req, res) => {
-	res.status(404).json({ error: 'Not Found! The page you are trying to access does not exist!' });
+	res.status(404).json({
+		message: 'Not Found! The page you are trying to access does not exist!',
+		status: 'Failed',
+		data: [],
+	});
 });
 const server = app.listen(app.get('port'), () => {
 	console.log('Application started. Listening :)');
