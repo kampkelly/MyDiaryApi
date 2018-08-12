@@ -61,7 +61,7 @@ var User = function () {
 			    dateOfBirth = _req$body.dateOfBirth;
 
 			_joi2.default.validate({
-				email: email, password: password, fullName: fullName, dateOfBirth: dateOfBirth
+				email: email, password: password, fullName: fullName
 			}, this.schema, function (err) {
 				if (err) {
 					callback('The email must be a valid email!');
@@ -69,8 +69,15 @@ var User = function () {
 					var saltRounds = 10;
 					var salt = _bcryptjs2.default.genSaltSync(saltRounds);
 					var hash = _bcryptjs2.default.hashSync(password, salt);
-					var sql = 'INSERT INTO users(fullName, email, password, dateOfBirth) VALUES($1, $2, $3, $4) RETURNING id';
-					var values = [fullName, email, hash, dateOfBirth];
+					var sql = '';
+					var values = '';
+					if (dateOfBirth === '') {
+						sql = 'INSERT INTO users(fullName, email, password) VALUES($1, $2, $3) RETURNING *';
+						values = [fullName, email, hash];
+					} else if (dateOfBirth !== '') {
+						sql = 'INSERT INTO users(fullName, email, password, dateOfBirth) VALUES($1, $2, $3, $4) RETURNING *';
+						values = [fullName, email, hash, dateOfBirth];
+					}
 					_this.pool.query(sql, values, function (error, res) {
 						if (error) {
 							callback('A user with this email already exists!', res);
@@ -148,8 +155,15 @@ var User = function () {
 				if (error) {
 					callback('The email must be a valid email!');
 				} else {
-					var sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
-					var values = [email, fullName, dateOfBirth, userId];
+					var sql = '';
+					var values = '';
+					if (dateOfBirth === '') {
+						sql = 'UPDATE users SET email=$1, fullName=$2 WHERE id=$4 RETURNING *';
+						values = [email, fullName, userId];
+					} else if (dateOfBirth !== '') {
+						sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4 RETURNING *';
+						values = [email, fullName, dateOfBirth, userId];
+					}
 					_this3.pool.query(sql, values, function (err, res) {
 						callback(err, res);
 					});
@@ -160,7 +174,7 @@ var User = function () {
 		key: 'setReminder',
 		value: function setReminder(req, callback) {
 			var userId = req.userData.id;
-			var sql = 'UPDATE users SET reminderTime=$1 WHERE id=$2';
+			var sql = 'UPDATE users SET reminderTime=$1 WHERE id=$2 RETURNING *';
 			var values = [req.body.reminderTime, userId];
 			this.pool.query(sql, values, function (err, res) {
 				callback(err, res);

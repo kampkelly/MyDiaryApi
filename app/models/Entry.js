@@ -84,13 +84,13 @@ var Entry = function () {
 				if (err) {
 					callback(err.details[0].message);
 				} else {
-					var sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3)';
+					var sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3) RETURNING *';
 					var values = [title, description, userId];
-					_this.pool.query(sql, values, function (error) {
+					_this.pool.query(sql, values, function (error, res) {
 						if (error) {
-							callback(error);
+							callback(error, res);
 						} else {
-							callback(error);
+							callback(error, res);
 						}
 					});
 				}
@@ -149,16 +149,16 @@ var Entry = function () {
 								var timeNow = (0, _moment2.default)().format('X');
 								var diff = (timeNow - timeCreated) / 86400;
 								if (diff <= 1) {
-									var updateSql = 'UPDATE entries SET title=$1, description=$2 WHERE id=$3';
+									var updateSql = 'UPDATE entries SET title=$1, description=$2 WHERE id=$3 RETURNING *';
 									var updateValues = [title, description, req.params.id];
-									_this2.pool.query(updateSql, updateValues, function (updateError) {
-										callback(updateError, 200);
+									_this2.pool.query(updateSql, updateValues, function (updateError, updateResponse) {
+										callback(updateError, 200, updateResponse);
 									});
 								} else if (time !== response.rows[0].createdAt) {
-									callback('This entry is old and can no longer be updated!', 403);
+									callback('This entry is old and can no longer be updated!', 403, []);
 								}
 							} else if (response.rows[0].user_id !== userId) {
-								callback('You do not have permission to edit this entry!', 403);
+								callback('You do not have permission to edit this entry!', 403, []);
 							}
 						}
 					});

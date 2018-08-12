@@ -47,10 +47,11 @@ var UserController = function (_User) {
 			    email = _req$body.email,
 			    password = _req$body.password,
 			    confirmPassword = _req$body.confirmPassword,
-			    dateOfBirth = _req$body.dateOfBirth,
-			    fullName = _req$body.fullName;
+			    fullName = _req$body.fullName,
+			    dateOfBirth = _req$body.dateOfBirth;
 
-			if (email === ' ' || dateOfBirth === ' ' || fullName === ' ' || password === ' ') {
+			var regEx = /^\d{4}-\d{2}-\d{2}$/;
+			if (email === ' ' || fullName === ' ' || password === ' ') {
 				res.status(422).json({
 					message: 'Please fill all the input fields!',
 					status: 'Failed',
@@ -68,9 +69,15 @@ var UserController = function (_User) {
 					status: 'Failed',
 					user: []
 				});
-			} else if (!email || !dateOfBirth || !fullName || !password) {
+			} else if (!email || !fullName || !password) {
 				res.status(400).json({
 					message: 'Bad Request!',
+					status: 'Failed',
+					user: []
+				});
+			} else if (dateOfBirth && dateOfBirth.match(regEx) === null) {
+				res.status(422).json({
+					message: 'Date of birth is not in the right format (yyyy-mm-dd)!',
 					status: 'Failed',
 					user: []
 				});
@@ -89,11 +96,15 @@ var UserController = function (_User) {
 							email: req.body.email,
 							id: response.rows[0].id
 						};
+						var user = response.rows[0];
+						user = Object.assign({}, user);
+						delete user.password;
 						var token = _jsonwebtoken2.default.sign(payload, process.env.secret_token, { expiresIn: 60000 });
 						res.status(201).json({
+							user: user,
+							token: token,
 							message: 'You have successfully signed up and signed in!',
-							status: 'Success',
-							user: { token: token }
+							status: 'Success'
 						});
 					}
 				});
@@ -148,9 +159,10 @@ var UserController = function (_User) {
 						delete user.password;
 						var token = _jsonwebtoken2.default.sign(payload, process.env.secret_token, { expiresIn: 60000 });
 						res.status(200).json({
+							user: user,
+							token: token,
 							message: 'You have signed in successfully!',
-							status: 'Success',
-							user: { user: user, token: token }
+							status: 'Success'
 						});
 					}
 				});
@@ -181,20 +193,20 @@ var UserController = function (_User) {
 	}, {
 		key: 'update',
 		value: function update(req, res) {
-			if (!req.body.email || !req.body.fullName || !req.body.dateOfBirth) {
+			if (!req.body.email || !req.body.fullName) {
 				res.status(400).json({
 					message: 'Bad Request!',
 					status: 'Failed',
 					user: []
 				});
-			} else if (req.body.email === ' ' || req.body.fullName === ' ' || req.body.dateOfBirth === ' ') {
+			} else if (req.body.email === ' ' || req.body.fullName === ' ') {
 				res.status(422).json({
 					message: 'Please fill all the input fields!',
 					status: 'Failed',
 					user: []
 				});
 			} else {
-				this.updateUser(req, function (err) {
+				this.updateUser(req, function (err, response) {
 					if (err) {
 						res.status(400).json({
 							message: err,
@@ -202,10 +214,13 @@ var UserController = function (_User) {
 							user: []
 						});
 					} else {
+						var user = response.rows[0];
+						user = Object.assign({}, user);
+						delete user.password;
 						res.status(200).json({
+							user: user,
 							message: 'Your Profile has been updated!',
-							status: 'Success',
-							user: []
+							status: 'Success'
 						});
 					}
 				});
@@ -227,7 +242,7 @@ var UserController = function (_User) {
 					user: []
 				});
 			} else {
-				this.setReminder(req, function (err) {
+				this.setReminder(req, function (err, response) {
 					if (err) {
 						res.status(400).json({
 							message: err,
@@ -235,10 +250,13 @@ var UserController = function (_User) {
 							user: []
 						});
 					} else {
-						res.status(422).json({
+						var user = response.rows[0];
+						user = Object.assign({}, user);
+						delete user.password;
+						res.status(200).json({
+							user: user,
 							message: 'Your notification setting has been updated!',
-							status: 'Success',
-							user: []
+							status: 'Success'
 						});
 					}
 				});

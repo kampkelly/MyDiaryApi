@@ -65,7 +65,7 @@ class EntryController extends Entry {
 					entry: [],
 				});
 			} else {
-				this.createEntry(req, (error) => {
+				this.createEntry(req, (error, response) => {
 					if (error) {
 						res.status(409).json({
 							message: error,
@@ -76,7 +76,7 @@ class EntryController extends Entry {
 						res.status(201).json({
 							message: 'Entry has been created!',
 							status: 'Success',
-							entry: [],
+							entry: response.rows[0],
 						});
 					}
 				});
@@ -111,7 +111,7 @@ class EntryController extends Entry {
 					entry: [],
 				});
 			} else {
-				this.updateEntry(req, (error, code) => {
+				this.updateEntry(req, (error, code, response) => {
 					if (error) {
 						res.status(code).json({
 							message: error,
@@ -122,7 +122,7 @@ class EntryController extends Entry {
 						res.status(200).json({
 							message: 'This entry has been updated!',
 							status: 'Success',
-							entry: [],
+							entry: response.rows[0],
 						});
 					}
 				});

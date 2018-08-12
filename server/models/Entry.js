@@ -53,13 +53,13 @@ class Entry {
 			if (err) {
 				callback(err.details[0].message);
 			} else {
-				const sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3)';
+				const sql = 'INSERT INTO entries(title, description, user_id) VALUES($1, $2, $3) RETURNING *';
 				const values = [title, description, userId];
-				this.pool.query(sql, values, (error) => {
+				this.pool.query(sql, values, (error, res) => {
 					if (error) {
-						callback(error);
+						callback(error, res);
 					} else {
-						callback(error);
+						callback(error, res);
 					}
 				});
 			}
@@ -113,16 +113,16 @@ class Entry {
 							const timeNow = moment().format('X');
 							const diff = (timeNow - timeCreated) / 86400;
 							if (diff <= 1) {
-								const updateSql = 'UPDATE entries SET title=$1, description=$2 WHERE id=$3';
+								const updateSql = 'UPDATE entries SET title=$1, description=$2 WHERE id=$3 RETURNING *';
 								const updateValues = [title, description, req.params.id];
-								this.pool.query(updateSql, updateValues, (updateError) => {
-									callback(updateError, 200);
+								this.pool.query(updateSql, updateValues, (updateError, updateResponse) => {
+									callback(updateError, 200, updateResponse);
 								});
 							} else if (time !== response.rows[0].createdAt) {
-								callback('This entry is old and can no longer be updated!', 403);
+								callback('This entry is old and can no longer be updated!', 403, []);
 							}
 						} else if (response.rows[0].user_id !== userId) {
-							callback('You do not have permission to edit this entry!', 403);
+							callback('You do not have permission to edit this entry!', 403, []);
 						}
 					}
 				});
