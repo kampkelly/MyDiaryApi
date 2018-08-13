@@ -12,9 +12,10 @@ class UserController extends User {
 
 	signUp(req, res) {
 		const {
-			email, password, confirmPassword, dateOfBirth, fullName,
+			email, password, confirmPassword, fullName, dateOfBirth,
 		} = req.body;
-		if (email === ' ' || dateOfBirth === ' ' || fullName === ' ' || password === ' ') {
+		const regEx = /^\d{4}-\d{2}-\d{2}$/;
+		if (email === ' ' || fullName === ' ' || password === ' ') {
 			res.status(422).json({
 				message: 'Please fill all the input fields!',
 				status: 'Failed',
@@ -32,9 +33,15 @@ class UserController extends User {
 				status: 'Failed',
 				user: [],
 			});
-		} else if (!email || !dateOfBirth || !fullName || !password) {
+		} else if (!email || !fullName || !password) {
 			res.status(400).json({
 				message: 'Bad Request!',
+				status: 'Failed',
+				user: [],
+			});
+		} else if (dateOfBirth && dateOfBirth.match(regEx) === null) {
+			res.status(422).json({
+				message: 'Date of birth is not in the right format (yyyy-mm-dd)!',
 				status: 'Failed',
 				user: [],
 			});
@@ -53,11 +60,15 @@ class UserController extends User {
 						email: req.body.email,
 						id: response.rows[0].id,
 					};
+					let user = response.rows[0];
+					user = Object.assign({}, user);
+					delete user.password;
 					const token = jwt.sign(payload, process.env.secret_token, { expiresIn: 60000 });
 					res.status(201).json({
+						user,
+						token,
 						message: 'You have successfully signed up and signed in!',
 						status: 'Success',
-						user: { token },
 					});
 				}
 			});
@@ -108,9 +119,10 @@ class UserController extends User {
 					delete user.password;
 					const token = jwt.sign(payload, process.env.secret_token, { expiresIn: 60000 });
 					res.status(200).json({
+						user,
+						token,
 						message: 'You have signed in successfully!',
 						status: 'Success',
-						user: { user, token },
 					});
 				}
 			});
@@ -139,20 +151,20 @@ class UserController extends User {
 	}
 
 	update(req, res) {
-		if (!req.body.email || !req.body.fullName || !req.body.dateOfBirth) {
+		if (!req.body.email || !req.body.fullName) {
 			res.status(400).json({
 				message: 'Bad Request!',
 				status: 'Failed',
 				user: [],
 			});
-		} else if (req.body.email === ' ' || req.body.fullName === ' ' || req.body.dateOfBirth === ' ') {
+		} else if (req.body.email === ' ' || req.body.fullName === ' ') {
 			res.status(422).json({
 				message: 'Please fill all the input fields!',
 				status: 'Failed',
 				user: [],
 			});
 		} else {
-			this.updateUser(req, (err) => {
+			this.updateUser(req, (err, response) => {
 				if (err) {
 					res.status(400).json({
 						message: err,
@@ -160,10 +172,13 @@ class UserController extends User {
 						user: [],
 					});
 				} else {
+					let user = response.rows[0];
+					user = Object.assign({}, user);
+					delete user.password;
 					res.status(200).json({
+						user,
 						message: 'Your Profile has been updated!',
 						status: 'Success',
-						user: [],
 					});
 				}
 			});
@@ -184,7 +199,7 @@ class UserController extends User {
 				user: [],
 			});
 		} else {
-			this.setReminder(req, (err) => {
+			this.setReminder(req, (err, response) => {
 				if (err) {
 					res.status(400).json({
 						message: err,
@@ -192,10 +207,13 @@ class UserController extends User {
 						user: [],
 					});
 				} else {
-					res.status(422).json({
+					let user = response.rows[0];
+					user = Object.assign({}, user);
+					delete user.password;
+					res.status(200).json({
+						user,
 						message: 'Your notification setting has been updated!',
 						status: 'Success',
-						user: [],
 					});
 				}
 			});

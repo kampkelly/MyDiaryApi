@@ -30,7 +30,7 @@ class User {
 			email, fullName, password, dateOfBirth,
 		} = req.body;
 		Joi.validate({
-			email, password, fullName, dateOfBirth,
+			email, password, fullName,
 		}, this.schema, (err) => {
 			if (err) {
 				callback('The email must be a valid email!');
@@ -38,8 +38,15 @@ class User {
 				const saltRounds = 10;
 				const salt = bcryptjs.genSaltSync(saltRounds);
 				const hash = bcryptjs.hashSync(password, salt);
-				const sql = 'INSERT INTO users(fullName, email, password, dateOfBirth) VALUES($1, $2, $3, $4) RETURNING id';
-				const values = [fullName, email, hash, dateOfBirth];
+				let sql = '';
+				let values = '';
+				if (dateOfBirth === '') {
+					sql = 'INSERT INTO users(fullName, email, password) VALUES($1, $2, $3) RETURNING *';
+					values = [fullName, email, hash];
+				} else if (dateOfBirth !== '') {
+					sql = 'INSERT INTO users(fullName, email, password, dateOfBirth) VALUES($1, $2, $3, $4) RETURNING *';
+					values = [fullName, email, hash, dateOfBirth];
+				}
 				this.pool.query(sql, values, (error, res) => {
 					if (error) {
 						callback('A user with this email already exists!', res);
@@ -107,8 +114,15 @@ class User {
 			if (error) {
 				callback('The email must be a valid email!');
 			} else {
-				const sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4';
-				const values = [email, fullName, dateOfBirth, userId];
+				let sql = '';
+				let values = '';
+				if (dateOfBirth === '') {
+					sql = 'UPDATE users SET email=$1, fullName=$2 WHERE id=$4 RETURNING *';
+					values = [email, fullName, userId];
+				} else if (dateOfBirth !== '') {
+					sql = 'UPDATE users SET email=$1, fullName=$2, dateOfBirth=$3 WHERE id=$4 RETURNING *';
+					values = [email, fullName, dateOfBirth, userId];
+				}
 				this.pool.query(sql, values, (err, res) => {
 					callback(err, res);
 				});
@@ -118,7 +132,7 @@ class User {
 
 	setReminder(req, callback) {
 		const userId = req.userData.id;
-		const sql = 'UPDATE users SET reminderTime=$1 WHERE id=$2';
+		const sql = 'UPDATE users SET reminderTime=$1 WHERE id=$2 RETURNING *';
 		const values = [req.body.reminderTime, userId];
 		this.pool.query(sql, values, (err, res) => {
 			callback(err, res);

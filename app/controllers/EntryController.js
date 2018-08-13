@@ -97,7 +97,7 @@ var EntryController = function (_Entry) {
 						entry: []
 					});
 				} else {
-					this.createEntry(req, function (error) {
+					this.createEntry(req, function (error, response) {
 						if (error) {
 							res.status(409).json({
 								message: error,
@@ -108,7 +108,7 @@ var EntryController = function (_Entry) {
 							res.status(201).json({
 								message: 'Entry has been created!',
 								status: 'Success',
-								entry: []
+								entry: response.rows[0]
 							});
 						}
 					});
@@ -144,7 +144,7 @@ var EntryController = function (_Entry) {
 						entry: []
 					});
 				} else {
-					this.updateEntry(req, function (error, code) {
+					this.updateEntry(req, function (error, code, response) {
 						if (error) {
 							res.status(code).json({
 								message: error,
@@ -155,7 +155,7 @@ var EntryController = function (_Entry) {
 							res.status(200).json({
 								message: 'This entry has been updated!',
 								status: 'Success',
-								entry: []
+								entry: response.rows[0]
 							});
 						}
 					});
