@@ -8,7 +8,7 @@
 				"coverage": "NODE_ENV=test node app/helpers/migrate.js && NODE_ENV=test node node_modules/.bin/istanbul cover _mocha -- -R spec app/tests",
 				"coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
 				"compile": "grunt babel",
-				"start": "grunt babel && NODE_ENV=production node app/app.js",
+				"start": "grunt babel && NODE_ENV=production nodemon app/app.js",
 				"watch": "grunt watch",
 				"build": "NODE_ENV=production node app/app.js"
 		},
@@ -40,6 +40,7 @@
 				"jsonwebtoken": "^8.3.0",
 				"moment": "^2.22.2",
 				"nock": "^9.4.2",
+				"nodemailer": "^4.6.7",
 				"npm": "^6.2.0",
 				"pg": "^7.4.3",
 				"request": "^2.87.0",

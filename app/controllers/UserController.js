@@ -10,9 +10,17 @@ var _jsonwebtoken = require('jsonwebtoken');
 
 var _jsonwebtoken2 = _interopRequireDefault(_jsonwebtoken);
 
+var _nodemailer = require('nodemailer');
+
+var _nodemailer2 = _interopRequireDefault(_nodemailer);
+
 var _dotenv = require('dotenv');
 
 var _dotenv2 = _interopRequireDefault(_dotenv);
+
+var _moment = require('moment');
+
+var _moment2 = _interopRequireDefault(_moment);
 
 var _User2 = require('../models/User');
 
@@ -37,6 +45,13 @@ var UserController = function (_User) {
 		var _this = _possibleConstructorReturn(this, (UserController.__proto__ || Object.getPrototypeOf(UserController)).call(this));
 
 		_this.user = '';
+		_this.transporter = _nodemailer2.default.createTransport({
+			service: 'mailtrap',
+			auth: {
+				user: process.env.emailUsername,
+				pass: process.env.emailPassword
+			}
+		});
 		return _this;
 	}
 
@@ -261,6 +276,52 @@ var UserController = function (_User) {
 					}
 				});
 			}
+		}
+	}, {
+		key: 'processMail',
+		value: function processMail(from, to, subject, text) {
+			var mailOptions = {
+				from: from, to: to, subject: subject, text: text
+			};
+			this.transporter.sendMail(mailOptions, function (error, info) {
+				if (error) {
+					console.log(error);
+				} else {
+					console.log('Email sent: ' + info.response);
+				}
+			});
+		}
+	}, {
+		key: 'cronEmail',
+		value: function cronEmail(req, res) {
+			var _this2 = this;
+
+			this.getAllUsers(req, function (error, response) {
+				if (error) {
+					res.status(409).json({
+						message: error,
+						status: 'Failed',
+						data: []
+					});
+				} else {
+					var user = '';
+					for (var i = 0; i < response.rows.length; i += 1) {
+						user = response.rows[i];
+						if (user.remindertime !== null && user.remindertime !== ' ') {
+							var currentHour = (0, _moment2.default)().get('hour');
+							var reminderHour = user.remindertime.split(':')[0];
+							if (currentHour - reminderHour === 0) {
+								_this2.processMail('support@mydiary.com', user.email, 'Notification For MyDiary', 'Hi ' + user.fullname + ', you are receiving this email because you have chosen to be reminded daily to add a new entry to your MyDiary application. Thank you!');
+							}
+						}
+					}
+					res.status(200).json({
+						message: 'Retrieved',
+						status: 'Success',
+						data: 'Cron job ran successfully!'
+					});
+				}
+			});
 		}
 	}]);
 

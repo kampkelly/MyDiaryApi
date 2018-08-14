@@ -25,6 +25,17 @@ class User {
 		};
 	}
 
+	getAllUsers(req, callback) {
+		const sql = 'SELECT * FROM users';
+		this.pool.query(sql, (error, res) => {
+			if (error) {
+				callback(error.detail, res);
+			} else {
+				callback(error, res);
+			}
+		});
+	}
+
 	create(req, callback) {
 		const {
 			email, fullName, password, dateOfBirth,

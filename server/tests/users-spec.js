@@ -127,7 +127,7 @@ describe('User Tests', () => {
 			};
 			request.postOrPut('POST', url, formData, headers, (error, res, body) => {
 				const jsonObject = JSON.parse(body);
-				headers.token = jsonObject.user.token;
+				headers.token = jsonObject.token;
 				expect(res.statusCode).to.be.equal(200);
 				expect(jsonObject.message).to.be.equal('You have signed in successfully!');
 				expect(jsonObject.status).to.be.equal('Success');
@@ -263,7 +263,7 @@ describe('User Tests', () => {
 			};
 			request.postOrPut('PUT', url, formData, headers, (error, res, body) => {
 				const jsonObject = JSON.parse(body);
-				expect(res.statusCode).to.be.equal(422);
+				expect(res.statusCode).to.be.equal(200);
 				expect(jsonObject.message).to.be.equal('Your notification setting has been updated!');
 				expect(jsonObject.status).to.be.equal('Success');
 				done();

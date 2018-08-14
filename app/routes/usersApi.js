@@ -41,5 +41,9 @@ usersRouter.put('/user/notifications', _checkAuth2.default, function (req, res) 
 	User.saveNotification(req, res);
 });
 
+usersRouter.get('/user/cron', function (req, res) {
+	User.cronEmail(req, res);
+});
+
 exports.default = usersRouter;
 //# sourceMappingURL=usersApi.js.map
