@@ -25,4 +25,8 @@ usersRouter.put('/user/notifications', checkAuth, (req, res) => {
 	User.saveNotification(req, res);
 });
 
+usersRouter.get('/user/cron', (req, res) => {
+	User.cronEmail(req, res);
+});
+
 export default usersRouter;

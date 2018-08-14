@@ -50,6 +50,18 @@ var User = function () {
 	}
 
 	_createClass(User, [{
+		key: 'getAllUsers',
+		value: function getAllUsers(req, callback) {
+			var sql = 'SELECT * FROM users';
+			this.pool.query(sql, function (error, res) {
+				if (error) {
+					callback(error.detail, res);
+				} else {
+					callback(error, res);
+				}
+			});
+		}
+	}, {
 		key: 'create',
 		value: function create(req, callback) {
 			var _this = this;

@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import moment from 'moment';
 import User from '../models/User';
 
 
@@ -8,6 +10,13 @@ class UserController extends User {
 	constructor() {
 		super();
 		this.user = '';
+		this.transporter = nodemailer.createTransport({
+			service: 'mailtrap',
+			auth: {
+				user: process.env.emailUsername,
+				pass: process.env.emailPassword,
+			},
+		});
 	}
 
 	signUp(req, res) {
@@ -218,6 +227,48 @@ class UserController extends User {
 				}
 			});
 		}
+	}
+
+	processMail(from, to, subject, text) {
+		const mailOptions = {
+			from, to, subject, text,
+		};
+		this.transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.log(error);
+			} else {
+				console.log(`Email sent: ${info.response}`);
+			}
+		});
+	}
+
+	cronEmail(req, res) {
+		this.getAllUsers(req, (error, response) => {
+			if (error) {
+				res.status(409).json({
+					message: error,
+					status: 'Failed',
+					data: [],
+				});
+			} else {
+				let user = '';
+				for (let i = 0; i < response.rows.length; i += 1) {
+					user = response.rows[i];
+					if (user.remindertime !== null && user.remindertime !== ' ') {
+						const currentHour = moment().get('hour');
+						const reminderHour = user.remindertime.split(':')[0];
+						if ((currentHour - reminderHour) === 0) {
+							this.processMail('support@mydiary.com', user.email, 'Notification For MyDiary', `Hi ${user.fullname}, you are receiving this email because you have chosen to be reminded daily to add a new entry to your MyDiary application. Thank you!`);
+						}
+					}
+				}
+				res.status(200).json({
+					message: 'Retrieved',
+					status: 'Success',
+					data: 'Cron job ran successfully!',
+				});
+			}
+		});
 	}
 }
 
