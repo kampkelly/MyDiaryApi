@@ -29,6 +29,10 @@ usersRouter.post('/auth/login', function (req, res) {
 	User.signIn(req, res);
 });
 
+usersRouter.post('/auth/forgot_password', function (req, res) {
+	User.forgotPassword(req, res);
+});
+
 usersRouter.get('/user/profile', _checkAuth2.default, function (req, res) {
 	User.show(req, res);
 });

@@ -11,7 +11,7 @@ class UserController extends User {
 		super();
 		this.user = '';
 		this.transporter = nodemailer.createTransport({
-			service: 'mailtrap',
+			service: process.env.emailHost,
 			auth: {
 				user: process.env.emailUsername,
 				pass: process.env.emailPassword,
@@ -73,6 +73,7 @@ class UserController extends User {
 					user = Object.assign({}, user);
 					delete user.password;
 					const token = jwt.sign(payload, process.env.secret_token, { expiresIn: 60000 });
+					this.processMail('support@mydiary.com', email, 'Welcome To MyDiary', `Hi ${fullName}, welcome to MyDiary. These are your signin details - email: "${email}", password: "${password}". Please keep them safe. Thank you!`);
 					res.status(201).json({
 						user,
 						token,
@@ -223,6 +224,39 @@ class UserController extends User {
 						user,
 						message: 'Your notification setting has been updated!',
 						status: 'Success',
+					});
+				}
+			});
+		}
+	}
+
+	forgotPassword(req, res) {
+		if (!req.body.email) {
+			res.status(400).json({
+				message: 'Bad Request!',
+				status: 'Failed',
+				user: [],
+			});
+		} else if (req.body.email === ' ') {
+			res.status(422).json({
+				message: 'Please pick a date for your notification!',
+				status: 'Failed',
+				user: [],
+			});
+		} else {
+			this.sendNewPassword(req, (err, response, password) => {
+				if (err) {
+					res.status(404).json({
+						message: err,
+						status: 'Failed',
+						user: [],
+					});
+				} else {
+					this.processMail('support@mydiary.com', response.rows[0].email, 'Password Reset For MyDiary', `Hi ${response.rows[0].fullname}, you requested to reset your password. This is your new password: "${password}", you will need this to login as from now on. Please keep it safe. If this was not done by you. Please contact us. Thank you!`);
+					res.status(200).json({
+						message: 'Your password has been reset and email sent to your email address',
+						status: 'Success',
+						email: response.rows[0].email,
 					});
 				}
 			});

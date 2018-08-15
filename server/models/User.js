@@ -149,6 +149,22 @@ class User {
 			callback(err, res);
 		});
 	}
+
+	sendNewPassword(req, callback) {
+		const saltRounds = 10;
+		const salt = bcryptjs.genSaltSync(saltRounds);
+		const password = 'passworddkj';
+		const hash = bcryptjs.hashSync(password, salt);
+		const sql = 'UPDATE users SET password=$1 WHERE email=$2 RETURNING email, fullname';
+		const values = [hash, req.body.email];
+		this.pool.query(sql, values, (err, res) => {
+			if (res.rows.length < 1) {
+				callback('This email does not exist on our database!', null, null);
+			} else {
+				callback(null, res, password);
+			}
+		});
+	}
 }
 
 export default User;

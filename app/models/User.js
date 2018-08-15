@@ -192,6 +192,23 @@ var User = function () {
 				callback(err, res);
 			});
 		}
+	}, {
+		key: 'sendNewPassword',
+		value: function sendNewPassword(req, callback) {
+			var saltRounds = 10;
+			var salt = _bcryptjs2.default.genSaltSync(saltRounds);
+			var password = 'passworddkj';
+			var hash = _bcryptjs2.default.hashSync(password, salt);
+			var sql = 'UPDATE users SET password=$1 WHERE email=$2 RETURNING email, fullname';
+			var values = [hash, req.body.email];
+			this.pool.query(sql, values, function (err, res) {
+				if (res.rows.length < 1) {
+					callback('This email does not exist on our database!', null, null);
+				} else {
+					callback(null, res, password);
+				}
+			});
+		}
 	}]);
 
 	return User;

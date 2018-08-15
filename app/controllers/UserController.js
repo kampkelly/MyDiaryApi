@@ -46,7 +46,7 @@ var UserController = function (_User) {
 
 		_this.user = '';
 		_this.transporter = _nodemailer2.default.createTransport({
-			service: 'mailtrap',
+			service: process.env.emailHost,
 			auth: {
 				user: process.env.emailUsername,
 				pass: process.env.emailPassword
@@ -58,6 +58,8 @@ var UserController = function (_User) {
 	_createClass(UserController, [{
 		key: 'signUp',
 		value: function signUp(req, res) {
+			var _this2 = this;
+
 			var _req$body = req.body,
 			    email = _req$body.email,
 			    password = _req$body.password,
@@ -115,6 +117,7 @@ var UserController = function (_User) {
 						user = Object.assign({}, user);
 						delete user.password;
 						var token = _jsonwebtoken2.default.sign(payload, process.env.secret_token, { expiresIn: 60000 });
+						_this2.processMail('support@mydiary.com', email, 'Welcome To MyDiary', 'Hi ' + fullName + ', welcome to MyDiary. These are your signin details - email: "' + email + '", password: "' + password + '". Please keep them safe. Thank you!');
 						res.status(201).json({
 							user: user,
 							token: token,
@@ -278,6 +281,42 @@ var UserController = function (_User) {
 			}
 		}
 	}, {
+		key: 'forgotPassword',
+		value: function forgotPassword(req, res) {
+			var _this3 = this;
+
+			if (!req.body.email) {
+				res.status(400).json({
+					message: 'Bad Request!',
+					status: 'Failed',
+					user: []
+				});
+			} else if (req.body.email === ' ') {
+				res.status(422).json({
+					message: 'Please pick a date for your notification!',
+					status: 'Failed',
+					user: []
+				});
+			} else {
+				this.sendNewPassword(req, function (err, response, password) {
+					if (err) {
+						res.status(404).json({
+							message: err,
+							status: 'Failed',
+							user: []
+						});
+					} else {
+						_this3.processMail('support@mydiary.com', response.rows[0].email, 'Password Reset For MyDiary', 'Hi ' + response.rows[0].fullname + ', you requested to reset your password. This is your new password: "' + password + '", you will need this to login as from now on. Please keep it safe. If this was not done by you. Please contact us. Thank you!');
+						res.status(200).json({
+							message: 'Your password has been reset and email sent to your email address',
+							status: 'Success',
+							email: response.rows[0].email
+						});
+					}
+				});
+			}
+		}
+	}, {
 		key: 'processMail',
 		value: function processMail(from, to, subject, text) {
 			var mailOptions = {
@@ -294,7 +333,7 @@ var UserController = function (_User) {
 	}, {
 		key: 'cronEmail',
 		value: function cronEmail(req, res) {
-			var _this2 = this;
+			var _this4 = this;
 
 			this.getAllUsers(req, function (error, response) {
 				if (error) {
@@ -311,7 +350,7 @@ var UserController = function (_User) {
 							var currentHour = (0, _moment2.default)().get('hour');
 							var reminderHour = user.remindertime.split(':')[0];
 							if (currentHour - reminderHour === 0) {
-								_this2.processMail('support@mydiary.com', user.email, 'Notification For MyDiary', 'Hi ' + user.fullname + ', you are receiving this email because you have chosen to be reminded daily to add a new entry to your MyDiary application. Thank you!');
+								_this4.processMail('support@mydiary.com', user.email, 'Notification For MyDiary', 'Hi ' + user.fullname + ', you are receiving this email because you have chosen to be reminded daily to add a new entry to your MyDiary application. Thank you!');
 							}
 						}
 					}
