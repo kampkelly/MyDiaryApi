@@ -13,6 +13,10 @@ usersRouter.post('/auth/login', (req, res) => {
 	User.signIn(req, res);
 });
 
+usersRouter.post('/auth/forgot_password', (req, res) => {
+	User.forgotPassword(req, res);
+});
+
 usersRouter.get('/user/profile', checkAuth, (req, res) => {
 	User.show(req, res);
 });
