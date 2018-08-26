@@ -25,45 +25,21 @@ class UserController extends User {
 		} = req.body;
 		const regEx = /^\d{4}-\d{2}-\d{2}$/;
 		if (email === ' ' || fullName === ' ' || password === ' ') {
-			res.status(422).json({
-				message: 'Please fill all the input fields!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Please fill all the input fields!', 'Failed', 'user', []);
 		} else if (password.length < 6) {
-			res.status(422).json({
-				message: 'Password length must be at least 6 characters!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Password length must be at least 6 characters!', 'Failed', 'user', []);
 		} else if (password !== confirmPassword) {
-			res.status(401).json({
-				message: 'Passwords do not match!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 401, 'Passwords do not match!', 'Failed', 'user', []);
 		} else if (!email || !fullName || !password) {
-			res.status(400).json({
-				message: 'Bad Request!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 400, 'Bad Request!', 'Failed', 'user', []);
 		} else if (dateOfBirth && dateOfBirth.match(regEx) === null) {
-			res.status(422).json({
-				message: 'Date of birth is not in the right format (yyyy-mm-dd)!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Date of birth is not in the right format (yyyy-mm-dd)!', 'Failed', 'user', []);
 		} else {
 			req.body.email = req.body.email.toLowerCase().replace(/\s+/g, '');
 			req.body.password = req.body.password.toLowerCase();
 			this.create(req, (error, response) => {
 				if (error) {
-					res.status(409).json({
-						message: error,
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 409, error, 'Failed', 'user', []);
 				} else {
 					const payload = {
 						email: req.body.email,
@@ -88,37 +64,17 @@ class UserController extends User {
 	signIn(req, res) {
 		const { email, password } = req.body;
 		if (email === ' ' || password === ' ') {
-			res.status(422).json({
-				message: 'Please fill all the input fields!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Please fill all the input fields!', 'Failed', 'user', []);
 		} else if (!email || !password) {
-			res.status(400).json({
-				message: 'Bad Request!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 400, 'Bad Request!', 'Failed', 'user', []);
 		} else if (password.length < 6) {
-			res.status(422).json({
-				message: 'Password length must be at least 6 characters!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Password length must be at least 6 characters!', 'Failed', 'user', []);
 		} else {
 			this.loginUser(req, (err, response) => {
 				if (err) {
-					res.status(500).json({
-						message: err,
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 500, err, 'Failed', 'user', []);
 				} else if (!response.rows || response.rows[0] === undefined) {
-					res.status(401).json({
-						message: 'Unauthorized! You are not allowed to log in!',
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 401, 'Unauthorized! You are not allowed to log in!', 'Failed', 'user', []);
 				} else {
 					let user = response.rows[0];
 					const payload = {
@@ -142,54 +98,30 @@ class UserController extends User {
 	show(req, res) {
 		this.showUser(req, (err, response) => {
 			if (err) {
-				res.status(400).json({
-					message: err,
-					status: 'Failed',
-					user: [],
-				});
+				this.responseFormat(res, 400, err, 'Failed', 'user', []);
 			} else {
 				let user = response.rows[0];
 				user = Object.assign({}, user);
 				delete user.password;
-				res.status(200).json({
-					message: 'Retrieved!',
-					status: 'Success',
-					user: { user },
-				});
+				this.responseFormat(res, 200, 'Retrieved!', 'Success', 'user', user);
 			}
 		});
 	}
 
 	update(req, res) {
 		if (!req.body.email || !req.body.fullName) {
-			res.status(400).json({
-				message: 'Bad Request!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 400, 'Bad Request!', 'Failed', 'user', []);
 		} else if (req.body.email === ' ' || req.body.fullName === ' ') {
-			res.status(422).json({
-				message: 'Please fill all the input fields!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Please fill all the input fields!', 'Failed', 'user', []);
 		} else {
 			this.updateUser(req, (err, response) => {
 				if (err) {
-					res.status(400).json({
-						message: err,
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 400, err, 'Failed', 'user', []);
 				} else {
 					let user = response.rows[0];
 					user = Object.assign({}, user);
 					delete user.password;
-					res.status(200).json({
-						user,
-						message: 'Your Profile has been updated!',
-						status: 'Success',
-					});
+					this.responseFormat(res, 200, 'Your Profile has been updated!', 'Success', 'user', user);
 				}
 			});
 		}
@@ -197,34 +129,18 @@ class UserController extends User {
 
 	saveNotification(req, res) {
 		if (!req.body.reminderTime) {
-			res.status(400).json({
-				message: 'Bad Request!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 400, 'Bad Request!', 'Failed', 'user', []);
 		} else if (req.body.reminderTime === ' ') {
-			res.status(422).json({
-				message: 'Please pick a date for your notification!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Please pick a date for your notification!', 'Failed', 'user', []);
 		} else {
 			this.setReminder(req, (err, response) => {
 				if (err) {
-					res.status(400).json({
-						message: err,
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 400, err, 'Failed', 'user', []);
 				} else {
 					let user = response.rows[0];
 					user = Object.assign({}, user);
 					delete user.password;
-					res.status(200).json({
-						user,
-						message: 'Your notification setting has been updated!',
-						status: 'Success',
-					});
+					this.responseFormat(res, 200, 'Your notification setting has been updated!', 'Success', 'user', user);
 				}
 			});
 		}
@@ -232,32 +148,16 @@ class UserController extends User {
 
 	forgotPassword(req, res) {
 		if (!req.body.email) {
-			res.status(400).json({
-				message: 'Bad Request!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 400, 'Bad Request!', 'Failed', 'user', []);
 		} else if (req.body.email === ' ') {
-			res.status(422).json({
-				message: 'Please pick a date for your notification!',
-				status: 'Failed',
-				user: [],
-			});
+			this.responseFormat(res, 422, 'Please enter email!', 'Failed', 'user', []);
 		} else {
 			this.sendNewPassword(req, (err, response, password) => {
 				if (err) {
-					res.status(404).json({
-						message: err,
-						status: 'Failed',
-						user: [],
-					});
+					this.responseFormat(res, 404, err, 'Failed', 'user', []);
 				} else {
 					this.processMail('support@mydiary.com', response.rows[0].email, 'Password Reset For MyDiary', `Hi ${response.rows[0].fullname}, you requested to reset your password. This is your new password: "${password}", you will need this to login as from now on. Please keep it safe. If this was not done by you. Please contact us. Thank you!`);
-					res.status(200).json({
-						message: 'Your password has been reset and email sent to your email address',
-						status: 'Success',
-						email: response.rows[0].email,
-					});
+					this.responseFormat(res, 200, 'Your password has been reset and email sent to your email address', 'Success', 'email', response.rows[0].email);
 				}
 			});
 		}
@@ -279,11 +179,7 @@ class UserController extends User {
 	cronEmail(req, res) {
 		this.getAllUsers(req, (error, response) => {
 			if (error) {
-				res.status(409).json({
-					message: error,
-					status: 'Failed',
-					data: [],
-				});
+				this.responseFormat(res, 409, error, 'Failed', 'data', []);
 			} else {
 				let user = '';
 				for (let i = 0; i < response.rows.length; i += 1) {
@@ -296,12 +192,16 @@ class UserController extends User {
 						}
 					}
 				}
-				res.status(200).json({
-					message: 'Retrieved',
-					status: 'Success',
-					data: 'Cron job ran successfully!',
-				});
+				this.responseFormat(res, 200, 'Cron job ran successfully!', 'Success', 'data', []);
 			}
+		});
+	}
+	// eslint-disable-next-line
+	responseFormat(res, code, message, status, data, value) {
+		res.status(code).json({
+			message,
+			status,
+			[data]: value,
 		});
 	}
 }

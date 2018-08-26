@@ -192,6 +192,21 @@ describe('Test Entries Routes', () => {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should update an entry', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries/1`;
+			const formData = {
+				title: 'The New Title Here',
+				description: 'This is the new description also',
+			};
+			request.postOrPut('PUT', url, formData, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('This entry has been updated!');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('deleteEntry()', () => {

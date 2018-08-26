@@ -11,17 +11,9 @@ class EntryController extends Entry {
 	index(req, res) {
 		this.allEntries(req, (error, response) => {
 			if (error) {
-				res.status(409).json({
-					message: error,
-					status: 'Failed',
-					entries: [],
-				});
+				this.responseFormat(res, 409, error, 'Failed', 'entries', []);
 			} else {
-				res.status(200).json({
-					message: 'Retrieved',
-					status: 'Success',
-					entries: response.rows,
-				});
+				this.responseFormat(res, 200, 'Retrieved', 'Success', 'entries', response.rows);
 			}
 		});
 	}
@@ -29,128 +21,72 @@ class EntryController extends Entry {
 	show(req, res) {
 		this.showEntry(req, (error, code, response) => {
 			if (error) {
-				res.status(code).json({
-					message: error,
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, code, error, 'Failed', 'entry', []);
 			} else {
-				res.status(200).json({
-					message: 'Retrieved',
-					status: 'Success',
-					entry: response.rows[0],
-				});
+				this.responseFormat(res, 200, 'Retrieved', 'Success', 'entry', response.rows[0]);
 			}
 		});
 	}
 
 	create(req, res) {
 		if (req.body.title === ' ' || req.body.description === ' ') {
-			res.status(422).json({
-				message: 'Please fill all the input fields!',
-				status: 'Failed',
-				entry: [],
-			});
+			this.responseFormat(res, 422, 'Please fill all the input fields!', 'Failed', 'entry', []);
 		} else if (req.body.title && req.body.description) {
 			if (req.body.title.length < 10) {
-				res.status(409).json({
-					message: 'Your title is too short, minimum 10 letters!',
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, 409, 'Your title is too short, minimum 10 letters!', 'Failed', 'entry', []);
 			} else if (req.body.description.length < 20) {
-				res.status(409).json({
-					message: 'Your description is too short, minimum 20 letters!',
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, 409, 'Your description is too short, minimum 20 letters!', 'Failed', 'entry', []);
 			} else {
 				this.createEntry(req, (error, response) => {
 					if (error) {
-						res.status(409).json({
-							message: error,
-							status: 'Failed',
-							entry: { error },
-						});
+						this.responseFormat(res, 409, error, 'Failed', 'entry', error);
 					} else {
-						res.status(201).json({
-							message: 'Entry has been created!',
-							status: 'Success',
-							entry: response.rows[0],
-						});
+						this.responseFormat(res, 201, 'Entry has been created!', 'Success', 'entry', response.rows[0]);
 					}
 				});
 			}
 		} else {
-			res.status(400).json({
-				message: 'Bad request!',
-				status: 'Failed',
-				entry: [],
-			});
+			this.responseFormat(res, 400, 'Bad request!', 'Failed', 'entry', []);
 		}
 	}
 
 	update(req, res) {
 		if (req.body.title === ' ' || req.body.description === ' ') {
-			res.status(422).json({
-				message: 'Please fill all the input fields!',
-				status: 'Failed',
-				entry: [],
-			});
+			this.responseFormat(res, 422, 'Please fill all the input fields!', 'Failed', 'entry', []);
 		} else if (req.body.title && req.body.description) {
 			if (req.body.title.length < 10) {
-				res.status(409).json({
-					message: 'Your title is too short, minimum 10 letters!',
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, 409, 'Your title is too short, minimum 10 letters!', 'Failed', 'entry', []);
 			} else if (req.body.description.length < 20) {
-				res.status(409).json({
-					message: 'Your description is too short, minimum 20 letters!',
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, 409, 'Your description is too short, minimum 20 letters!', 'Failed', 'entry', []);
 			} else {
 				this.updateEntry(req, (error, code, response) => {
 					if (error) {
-						res.status(code).json({
-							message: error,
-							status: 'Failed',
-							entry: [],
-						});
+						this.responseFormat(res, code, error, 'Failed', 'entry', []);
 					} else {
-						res.status(200).json({
-							message: 'This entry has been updated!',
-							status: 'Success',
-							entry: response.rows[0],
-						});
+						this.responseFormat(res, 200, 'This entry has been updated!', 'Success', 'entry', response.rows[0]);
 					}
 				});
 			}
 		} else {
-			res.status(400).json({
-				message: 'Bad request!',
-				status: 'Failed',
-				entry: [],
-			});
+			this.responseFormat(res, 400, 'Bad request!', 'Failed', 'entry', []);
 		}
 	}
 
 	delete(req, res) {
 		this.deleteEntry(req, (error) => {
 			if (error) {
-				res.status(400).json({
-					message: error,
-					status: 'Failed',
-					entry: [],
-				});
+				this.responseFormat(res, 400, error, 'Failed', 'entry', []);
 			} else {
-				res.status(204).json({
-					message: 'Entry Deleted!',
-					status: 'Success',
-					entry: [],
-				});
+				this.responseFormat(res, 204, 'Entry Deleted!', 'Success', 'entry', []);
 			}
+		});
+	}
+	// eslint-disable-next-line
+	responseFormat(res, code, message, status, data, value) {
+		res.status(code).json({
+			message,
+			status,
+			[data]: value,
 		});
 	}
 }
