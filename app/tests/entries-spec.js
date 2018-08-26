@@ -208,6 +208,21 @@ describe('Test Entries Routes', function () {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should update an entry', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/entries/1';
+			var formData = {
+				title: 'The New Title Here',
+				description: 'This is the new description also'
+			};
+			request.postOrPut('PUT', url, formData, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('This entry has been updated!');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('deleteEntry()', function () {

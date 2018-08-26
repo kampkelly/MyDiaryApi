@@ -195,7 +195,7 @@ describe('User Tests', () => {
 
 		it('should show error if token is invalid', (done) => {
 			const url = `${process.env.root_url}${process.env.version_url}/user/profile`;
-			request.getOrDelete('GET', url, 'nnuio', (error, res, body) => {
+			request.getOrDelete('GET', url, [], (error, res, body) => {
 				const jsonObject = JSON.parse(body);
 				expect(res.statusCode).to.be.equal(401);
 				expect(jsonObject.message).to.be.equal('Unauthorized! You are not allowed to log in!');
@@ -294,6 +294,82 @@ describe('User Tests', () => {
 				expect(res.statusCode).to.be.equal(400);
 				expect(jsonObject.message).to.be.equal('Bad Request!');
 				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+	});
+
+	describe('forgotPassword()', () => {
+		it('should send existing user the password if forgotten', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/forgot_password`;
+			const formData = {
+				email: 'mynewemail@gmail.com',
+			};
+			request.postOrPut('POST', url, formData, [], (error, res, body) => {
+				console.log(error);
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Your password has been reset and email sent to your email address');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show bad request if email is not sent', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/forgot_password`;
+			const formData = {
+				fullName: 'kamp',
+			};
+			request.postOrPut('POST', url, formData, [], (error, res, body) => {
+				console.log(error);
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(400);
+				expect(jsonObject.message).to.be.equal('Bad Request!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should not send if email is empty', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/forgot_password`;
+			const formData = {
+				email: ' ',
+			};
+			request.postOrPut('POST', url, formData, [], (error, res, body) => {
+				console.log(error);
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(422);
+				expect(jsonObject.message).to.be.equal('Please enter email!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+
+		it('should show 404 if email does not exist in database', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/auth/forgot_password`;
+			const formData = {
+				email: 'kamp@gmail.com',
+			};
+			request.postOrPut('POST', url, formData, [], (error, res, body) => {
+				console.log(error);
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(404);
+				expect(jsonObject.message).to.be.equal('This email does not exist on our database!');
+				expect(jsonObject.status).to.be.equal('Failed');
+				done();
+			});
+		}).timeout(30000);
+	});
+
+	describe('runCronJob()', () => {
+		it('should send daily reminder email to users', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/user/cron`;
+			request.getOrDelete('GET', url, [], (error, res, body) => {
+				console.log(error);
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Cron job ran successfully!');
+				expect(jsonObject.status).to.be.equal('Success');
 				done();
 			});
 		}).timeout(30000);
