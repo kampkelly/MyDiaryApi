@@ -132,6 +132,17 @@ describe('Test Entries Routes', function () {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should show all entries with search params', function (done) {
+			var url = '' + process.env.root_url + process.env.version_url + '/entries?query=title';
+			request.getOrDelete('GET', url, headers, function (error, res, body) {
+				var jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Retrieved');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('showOneEntries()', function () {

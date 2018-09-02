@@ -47,7 +47,7 @@ var EntryController = function (_Entry) {
 				if (error) {
 					_this2.responseFormat(res, 409, error, 'Failed', 'entries', []);
 				} else {
-					_this2.responseFormat(res, 200, 'Retrieved', 'Success', 'entries', response.rows);
+					_this2.responseFormat(res, 200, 'Retrieved', 'Success', 'entries', response);
 				}
 			});
 		}

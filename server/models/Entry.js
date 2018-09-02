@@ -24,11 +24,18 @@ class Entry {
 
 	allEntries(req, callback) {
 		const userId = req.userData.id;
+		const searchQuery = req.query.query;
 		let sql;
 		let values;
 		if (req.query.limit) {
 			sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC LIMIT $2';
 			values = [userId, req.query.limit];
+		} else if (req.query.query === ' ' || req.query.query === '') {
+			callback('', []);
+			return;
+		} else if (req.query.query) {
+			sql = `SELECT * FROM entries WHERE title ILIKE '%${searchQuery}%' ORDER BY id DESC`;
+			values = [];
 		} else {
 			sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
 			values = [userId];
@@ -37,7 +44,7 @@ class Entry {
 			if (error) {
 				callback(error.detail, res);
 			} else {
-				callback(error, res);
+				callback(error, res.rows);
 			}
 		});
 	}
