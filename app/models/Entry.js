@@ -51,11 +51,18 @@ var Entry = function () {
 		key: 'allEntries',
 		value: function allEntries(req, callback) {
 			var userId = req.userData.id;
+			var searchQuery = req.query.query;
 			var sql = void 0;
 			var values = void 0;
 			if (req.query.limit) {
 				sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC LIMIT $2';
 				values = [userId, req.query.limit];
+			} else if (req.query.query === ' ' || req.query.query === '') {
+				callback('', []);
+				return;
+			} else if (req.query.query) {
+				sql = 'SELECT * FROM entries WHERE title ILIKE \'%' + searchQuery + '%\' ORDER BY id DESC';
+				values = [];
 			} else {
 				sql = 'SELECT * FROM entries WHERE user_id=$1 ORDER BY id DESC';
 				values = [userId];
@@ -64,7 +71,7 @@ var Entry = function () {
 				if (error) {
 					callback(error.detail, res);
 				} else {
-					callback(error, res);
+					callback(error, res.rows);
 				}
 			});
 		}

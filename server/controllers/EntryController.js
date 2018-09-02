@@ -13,7 +13,7 @@ class EntryController extends Entry {
 			if (error) {
 				this.responseFormat(res, 409, error, 'Failed', 'entries', []);
 			} else {
-				this.responseFormat(res, 200, 'Retrieved', 'Success', 'entries', response.rows);
+				this.responseFormat(res, 200, 'Retrieved', 'Success', 'entries', response);
 			}
 		});
 	}

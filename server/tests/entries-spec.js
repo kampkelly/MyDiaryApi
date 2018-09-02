@@ -116,6 +116,17 @@ describe('Test Entries Routes', () => {
 				done();
 			});
 		}).timeout(30000);
+
+		it('should show all entries with search params', (done) => {
+			const url = `${process.env.root_url}${process.env.version_url}/entries?query=title`;
+			request.getOrDelete('GET', url, headers, (error, res, body) => {
+				const jsonObject = JSON.parse(body);
+				expect(res.statusCode).to.be.equal(200);
+				expect(jsonObject.message).to.be.equal('Retrieved');
+				expect(jsonObject.status).to.be.equal('Success');
+				done();
+			});
+		}).timeout(30000);
 	});
 
 	describe('showOneEntries()', () => {
