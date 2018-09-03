@@ -1,0 +1,372 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "MyDiary",
+    "description": "A simple API to manage user accounts and their diary entries"
+  },
+  "tags": [
+    {
+      "name": "Entries",
+      "description": "Everything about entries",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "User",
+      "description": "Everything about users",
+      "externalDocs": {
+        "description": "Find out more about this api",
+        "url": "https://kampkelly-mydiary-api.herokuapp.com/api/v1/about.html"
+      }
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "host": "kampkelly-mydiary-api.herokuapp.com",
+  "basePath": "/api/v1",
+  "paths": {
+    "/entries": {
+      "get": {
+        "tags": [
+          "Entries"
+        ],
+        "summary": "Gets all diary entries",
+        "description": "Returns a list containing all entries",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The entry's id",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Entries"
+        ],
+        "summary": "Create an entry",
+        "description": "Creates a new entry",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "description": "The title of an entry",
+            "type": "number"
+          },
+          {
+            "name": "description",
+            "in": "path",
+            "description": "Description of entry",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/entries/:id": {
+      "get": {
+        "tags": [
+          "Entries"
+        ],
+        "summary": "Gets one diary entry",
+        "description": "Returns the details of an entry",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The entry's id",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Entries"
+        ],
+        "summary": "Updates an entry",
+        "description": "Updates an entry belonging to logged in user",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "description": "The title of an entry",
+            "type": "number"
+          },
+          {
+            "name": "description",
+            "in": "path",
+            "description": "Description of entry",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Entries"
+        ],
+        "summary": "Deletes an entry from the database",
+        "description": "Deletes an entry belonging to logged in user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The id of the entry",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Creates a new user",
+        "description": "Stores a new user in the database",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The entry's id",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "dateOfBirth": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "confirmPassword": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Signs in a user",
+        "description": "Logs in a user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The entry's id",
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An entry",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "dateOfBirth": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "confirmPassword": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/profile": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Shows a user profile",
+        "description": "Retrurns details of a user profile",
+        "responses": {
+          "200": {
+            "description": "A user profile",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "dateOfBirth": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update a user's profile",
+        "description": "Updates a user profile",
+        "responses": {
+          "200": {
+            "description": "A user profile",
+            "schema": {
+              "required": [
+                "username"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "fullName": {
+                  "type": "string"
+                },
+                "dateOfBirth": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

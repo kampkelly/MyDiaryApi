@@ -5,4 +5,3 @@ steps.txt
 coverage
 coverage/
 .coveralls.yml
-app
