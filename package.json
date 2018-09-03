@@ -44,7 +44,8 @@
 				"npm": "^6.2.0",
 				"pg": "^7.4.3",
 				"request": "^2.87.0",
-				"supertest": "^3.1.0"
+				"supertest": "^3.1.0",
+				"swagger-ui-express": "^4.0.1"
 		},
 		"devDependencies": {
 				"babel-eslint": "^8.2.6",

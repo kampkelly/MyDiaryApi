@@ -21,6 +21,10 @@ var _dotenv = require('dotenv');
 
 var _dotenv2 = _interopRequireDefault(_dotenv);
 
+var _swaggerUiExpress = require('swagger-ui-express');
+
+var _swaggerUiExpress2 = _interopRequireDefault(_swaggerUiExpress);
+
 var _CreateSchema = require('./models/CreateSchema');
 
 var _CreateSchema2 = _interopRequireDefault(_CreateSchema);
@@ -33,6 +37,10 @@ var _usersApi = require('./routes/usersApi');
 
 var _usersApi2 = _interopRequireDefault(_usersApi);
 
+var _swagger = require('./swagger.json');
+
+var _swagger2 = _interopRequireDefault(_swagger);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _dotenv2.default.config();
@@ -44,6 +52,7 @@ app.set('appVersion', process.env.version_url);
 app.use((0, _cors2.default)());
 app.use(_bodyParser2.default.urlencoded({ extended: true }));
 app.use(_bodyParser2.default.json());
+app.use('/api/v1/docs', _swaggerUiExpress2.default.serve, _swaggerUiExpress2.default.setup(_swagger2.default));
 app.use(app.get('appVersion'), _entriesApi2.default);
 app.use(app.get('appVersion'), _usersApi2.default);
 app.get('*', function (req, res) {
