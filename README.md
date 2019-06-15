@@ -1,6 +1,6 @@
 # MyDiary Application Api
 
-This api is going to be used to power the MyDiary application front-end
+This is the API going for the MyDiary application front-end
 
 ## Getting Started
 
