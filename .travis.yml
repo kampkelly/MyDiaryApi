@@ -1,0 +1,20 @@
+language: node_js
+sudo: false
+node_js:
+  - "8.8.1"
+install:
+  - npm install
+cache:
+  directories:
+    - "node_modules"
+before_script:
+  - npm run compile
+script: npm run coverage
+after_script:
+  - npm install codeclimate-test-reporter
+  - codeclimate-test-reporter < ./coverage/lcov.info
+after_success: 'npm run coveralls'
+addons:
+  code_climate:
+    repo_token:
+      secure: "f+4ZkXu9U96Fp4S9axOXj8R50q1vHFuI3SSKUSB9G4WOkjxA/POBWEyTkF4RpvsF8KLQGy6hZsHIXVinFPJOMGofQ/ixnoh75jI2dgQ054r3Gyfgm+7icMniq9xhuysDaHpfVEI21TuawuDL+rScecuBqVmrsDfT9ds2gGitMzunpKfhE30U9hWG7PbcZr8BFbeteKtQVAg30UJX796D7p4f87VQSP3RBa5j8ljttc1PAoJO0TyNnJ8xCbg98HDAcLEysCizKZIjR0sCcGZOTaMUlmyQwL+YcKJjgRZeFRT6Vwkq33vsrGLHb5g8Mf5ZLbn5M+Btiud/fKnR6N+bS/lOneQiE2Jcn+y9px+fMi6edMpWTbf8q3ZRD9d0mZhaEqwlZg+g2s69D4Ibsr5TAFtU/kE1fflvoodigGHK3aBq+d+Ns6M2Svl8AU0b3jnJiB1xyQfPYm9DIb5n6jluNsOQMnMRx3BnOpRqFLE/UWE5GeN8y52HQwOZpFnr9spze5hjNRcPhf0BauF5Bge2DbPTwngFwbmwkyh/CSLOIL1obS9/TOBuLrd9C2unwqQL/7W+knC+RYwUd4tDCAFQ4GPOsx/Y3PMYI+hNjROpEPmCHHNAfJokUb6insO9jIFFNxZxS8DiwHxKhyhjSG6D1VZdfRU9l3cAzkFq0LWQ8x8="

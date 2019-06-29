@@ -1,0 +1,7 @@
+node_modules
+steps.txt
+.env
+**/*.map
+coverage
+coverage/
+.coveralls.yml

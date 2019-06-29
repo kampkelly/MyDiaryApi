@@ -1,0 +1,42 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "node": true,
+		"mocha": true
+    },
+    "extends": ["eslint:recommended", "airbnb"],
+	"parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module",
+		"ecmaVersion": 9,
+		"ecmaFeatures": {
+			"jsx": true
+		}
+    },
+    "rules": {
+		"no-tabs": 0,
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+		"no-unused-vars": [
+	      "error",
+	      {
+	        "varsIgnorePattern": "should|expect"
+	      }
+	    ]
+    }
+}
